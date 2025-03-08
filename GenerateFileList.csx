@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-#load "Common.csx"
+﻿#load "Common.csx"
 
 static void GenerateFileList(string sourceDir, string outputFile, string[] searchPatterns, string[] excludePatterns)
 {

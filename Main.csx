@@ -1,5 +1,3 @@
-#nullable enable
-
 #r "nuget:System.CommandLine, 2.0.0-beta4.22272.1"
 
 #load "GenerateFileList.csx"
