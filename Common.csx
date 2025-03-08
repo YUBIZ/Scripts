@@ -7,18 +7,18 @@ static Regex GetRegex(string pattern)
 
 static string[] GetFileList(string sourceDir, string[] searchPatterns, string[] excludePatterns, SearchOption searchOption)
 {
-    string[] files = Directory.GetFiles(sourceDir, "", searchOption);
+    IEnumerable<string> files = Directory.EnumerateFiles(sourceDir, "", searchOption);
 
     if (searchPatterns.Length > 0)
     {
         IEnumerable<Regex> searchRegexes = searchPatterns.Select(GetRegex);
-        files = files.Where(f => searchRegexes.Any(regex => regex.IsMatch(Path.GetRelativePath(sourceDir, f)))).ToArray();
+        files = files.Where(f => searchRegexes.Any(regex => regex.IsMatch(Path.GetRelativePath(sourceDir, f))));
     }
     if (excludePatterns.Length > 0)
     {
         IEnumerable<Regex> excludeRegexes = excludePatterns.Select(GetRegex);
-        files = files.Where(f => !excludeRegexes.Any(regex => regex.IsMatch(Path.GetRelativePath(sourceDir, f)))).ToArray();
+        files = files.Where(f => !excludeRegexes.Any(regex => regex.IsMatch(Path.GetRelativePath(sourceDir, f))));
     }
 
-    return files;
+    return files.ToArray();
 }
