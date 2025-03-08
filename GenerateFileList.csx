@@ -6,7 +6,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
-static void EnumerateFiles(string sourceDir, string outputFile, string[] searchPatterns, string[] excludePatterns, string? stripPath)
+static void GenerateFileList(string sourceDir, string outputFile, string[] searchPatterns, string[] excludePatterns, string? stripPath)
 {
     stripPath ??= sourceDir;
     
