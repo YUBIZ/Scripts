@@ -11,7 +11,7 @@ RootCommand rootCommand = new("스크립트 명령어를 실행합니다.");
 // EnumerateFiles Command
 {
     Argument<string> argument = new("source-dir", "탐색할 디렉터리입니다.");
-    Argument<string> argument1 = new("output-path", "결과를 저장할 JSON 파일입니다.");
+    Argument<string> argument1 = new("output-file", "결과를 저장할 JSON 파일입니다.");
 
     Option<string[]> option = new("--search-patterns", "일치해야하는 파일 패턴 목록입니다.");
     Option<string[]> option1 = new("--exclude-patterns", "제외해야하는 파일 패턴 목록입니다.");

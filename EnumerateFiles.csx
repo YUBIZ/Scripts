@@ -6,7 +6,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
-static void EnumerateFiles(string sourceDir, string outputPath, string[] searchPatterns, string[] excludePatterns, string? stripPath)
+static void EnumerateFiles(string sourceDir, string outputFile, string[] searchPatterns, string[] excludePatterns, string? stripPath)
 {
     stripPath ??= sourceDir;
     
@@ -15,10 +15,10 @@ static void EnumerateFiles(string sourceDir, string outputPath, string[] searchP
 
     JsonSerializerOptions jsonSerializerOptions = new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
 
-    if (Path.GetDirectoryName(outputPath) is string outputDir && !string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
+    if (Path.GetDirectoryName(outputFile) is string outputDir && !string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
     {
         Directory.CreateDirectory(outputDir);
     }
 
-    File.WriteAllText(outputPath, JsonSerializer.Serialize(files, jsonSerializerOptions));
+    File.WriteAllText(outputFile, JsonSerializer.Serialize(files, jsonSerializerOptions));
 }
