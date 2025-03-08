@@ -8,7 +8,7 @@ using System.Text.Unicode;
 
 static void GenerateFileList(string sourceDir, string outputFile, string[] searchPatterns, string[] excludePatterns)
 {
-    IEnumerable<string> files = GetFiles(sourceDir, searchPatterns, excludePatterns, SearchOption.AllDirectories);
+    IEnumerable<string> files = GetFileList(sourceDir, searchPatterns, excludePatterns, SearchOption.AllDirectories);
 
     JsonSerializerOptions jsonSerializerOptions = new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
 

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-static string[] GetFiles(string sourceDir, string[] searchPatterns, string[] excludePatterns, SearchOption searchOption)
+static string[] GetFileList(string sourceDir, string[] searchPatterns, string[] excludePatterns, SearchOption searchOption)
 {
     string[] files = Directory.GetFiles(sourceDir, "", searchOption);
 
