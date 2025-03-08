@@ -6,12 +6,9 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
-static void GenerateFileList(string sourceDir, string outputFile, string[] searchPatterns, string[] excludePatterns, string? stripPath)
+static void GenerateFileList(string sourceDir, string outputFile, string[] searchPatterns, string[] excludePatterns)
 {
-    stripPath ??= sourceDir;
-    
-    IEnumerable<string> files = GetFiles(sourceDir, searchPatterns, excludePatterns, SearchOption.AllDirectories)
-                               .Select(f => Path.GetRelativePath(stripPath, f));
+    IEnumerable<string> files = GetFiles(sourceDir, searchPatterns, excludePatterns, SearchOption.AllDirectories);
 
     JsonSerializerOptions jsonSerializerOptions = new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
 

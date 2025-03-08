@@ -15,18 +15,16 @@ RootCommand rootCommand = new("스크립트 명령어를 실행합니다.");
 
     Option<string[]> option = new("--search-patterns", "일치해야하는 파일 패턴 목록입니다.");
     Option<string[]> option1 = new("--exclude-patterns", "제외해야하는 파일 패턴 목록입니다.");
-    Option<string?> option2 = new("--strip-path", "파일 경로에서 제거할 경로입니다.");
 
     var GenerateFileListCommand = new Command("generate-file-list", "파일 목록을 열거합니다.")
     {
         argument,
         argument1,
         option,
-        option1,
-        option2
+        option1
     };
 
-    GenerateFileListCommand.SetHandler(GenerateFileList, argument, argument1, option, option1, option2);
+    GenerateFileListCommand.SetHandler(GenerateFileList, argument, argument1, option, option1);
 
     rootCommand.Add(GenerateFileListCommand);
 }
