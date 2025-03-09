@@ -43,37 +43,30 @@ public readonly record struct FileTree(string Dir, FileTree[] SubDirs, string[] 
     }
 }
 
-static FileTree? GetFileTree(string dir)
-{
-    var subDirs = Directory.EnumerateDirectories(dir)
-                           .Select(GetFileTree)
-                           .Where(tree => tree.HasValue)
-                           .Select(tree => tree!.Value)
-                           .ToArray();
-
-    var files = Directory.EnumerateFiles(dir)
-                         .Select(Path.GetFileName)
-                         .ToArray();
-
-    return files.Length == 0 && subDirs.All(subDir => subDir.Files.Length == 0) ? null : new FileTree(Path.GetFileName(dir), subDirs, files);
-}
-
 static FileTree? GetFileTree(string dir, string[] searchPatterns, string[] excludePatterns)
 {
-    if (GetFileTree(dir) is not FileTree fileTree) return null;
+    return GetFileTreeInternal(Path.GetFullPath(dir), Path.GetFullPath(dir), searchPatterns, excludePatterns);
+}
 
-    Dictionary<string, FileTree> fileTreeDict = fileTree.ToDictionary();
+static FileTree? GetFileTreeInternal(string rootDir, string dir, string[] searchPatterns, string[] excludePatterns)
+{
+    var subDirs = Directory.EnumerateDirectories(dir)
+                           .Select(v => GetFileTreeInternal(rootDir, v, searchPatterns, excludePatterns))
+                           .Where(v => v.HasValue)
+                           .Select(v => v!.Value);
+
+    var files = Directory.EnumerateFiles(dir).Select(v => Path.GetRelativePath(rootDir, v));
 
     if (searchPatterns.Length > 0)
     {
         IEnumerable<Regex> searchRegexes = searchPatterns.Select(GetRegex);
-        // @TODO: 탐색 필터링 구현
+        files = files.Where(file => searchRegexes.Any(regex => regex.IsMatch(file)));
     }
     if (excludePatterns.Length > 0)
     {
         IEnumerable<Regex> excludeRegexes = excludePatterns.Select(GetRegex);
-        // @TODO: 제외 필터링 구현
+        files = files.Where(file => !excludeRegexes.Any(regex => regex.IsMatch(file)));
     }
 
-    return fileTree;
+    return !files.Any() && !subDirs.Any() ? null : new FileTree(Path.GetFileName(dir), subDirs.ToArray(), files.Select(Path.GetFileName).ToArray());
 }
