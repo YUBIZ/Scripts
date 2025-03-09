@@ -4,25 +4,6 @@ using System.Text.RegularExpressions;
 
 public readonly record struct FileTree(string Dir, FileTree[] SubDirs, string[] Files)
 {
-    public Dictionary<string, FileTree> ToDictionary()
-    {
-        Dictionary<string, FileTree> fileTreeDict = [];
-        ToDictionary(ref fileTreeDict);
-        return fileTreeDict;
-    }
-
-    private void ToDictionary(ref Dictionary<string, FileTree> fileTreeDict, string basePath = "")
-    {
-        foreach (var item in SubDirs)
-        {
-            item.ToDictionary(ref fileTreeDict, Path.Combine(basePath, item.Dir));
-        }
-        foreach (var item in Files)
-        {
-            fileTreeDict.Add(Path.Combine(basePath, item), this);
-        }
-    }
-
     public List<string> ToList()
     {
         List<string> fileList = [];
