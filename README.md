@@ -8,13 +8,17 @@
 
 dotnet-script 설치하기 위해서는 아래의 명령어를 실행합니다.
 
-> dotnet tool install -g dotnet-script
+```
+dotnet tool install -g dotnet-script
+```
 
 # 사용법
 
 스크립트를 실행하기 위해서는 아래의 명령어를 실행합니다.
 
-> dotnet script Main.csx [sub-command]
+```
+dotnet script Main.csx [sub-command]
+```
 
 ## 명령어 목록
 
