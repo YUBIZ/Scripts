@@ -26,26 +26,25 @@ public readonly record struct FileTree(string Dir, FileTree[] SubDirs, string[] 
 
 static FileTree? GetFileTree(string dir, string[] searchPatterns, string[] excludePatterns)
 {
-    return GetFileTreeInternal(Path.GetFullPath(dir), Path.GetFullPath(dir), searchPatterns, excludePatterns);
+    return GetFileTreeInternal(Path.GetFullPath(dir), Path.GetFullPath(dir), searchPatterns.Select(GetRegex), excludePatterns.Select(GetRegex));
 }
 
-static FileTree? GetFileTreeInternal(string rootDir, string dir, string[] searchPatterns, string[] excludePatterns)
+static FileTree? GetFileTreeInternal(string rootDir, string dir, IEnumerable<Regex> searchRegexes, IEnumerable<Regex> excludeRegexes)
 {
     var subDirs = Directory.EnumerateDirectories(dir)
-                           .Select(v => GetFileTreeInternal(rootDir, v, searchPatterns, excludePatterns))
+                           .Select(v => GetFileTreeInternal(rootDir, v, searchRegexes, excludeRegexes))
                            .Where(v => v.HasValue)
                            .Select(v => v!.Value);
 
     var files = Directory.EnumerateFiles(dir).Select(v => Path.GetRelativePath(rootDir, v));
 
-    if (searchPatterns.Length > 0)
+    if (searchRegexes.Any())
     {
-        IEnumerable<Regex> searchRegexes = searchPatterns.Select(GetRegex);
         files = files.Where(file => searchRegexes.Any(regex => regex.IsMatch(file)));
     }
-    if (excludePatterns.Length > 0)
+
+    if (excludeRegexes.Any())
     {
-        IEnumerable<Regex> excludeRegexes = excludePatterns.Select(GetRegex);
         files = files.Where(file => !excludeRegexes.Any(regex => regex.IsMatch(file)));
     }
 
