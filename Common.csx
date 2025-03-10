@@ -1,4 +1,4 @@
-#load "FileTree.cs"
+#load "Models/FileTree.cs"
 
 using System.Text.Encodings.Web;
 using System.Text.Json;
