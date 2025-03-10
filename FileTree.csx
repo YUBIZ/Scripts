@@ -24,9 +24,9 @@ public readonly record struct FileTree(string Name, FileTree[] SubDirs, string[]
     }
 }
 
-static FileTree? GetFileTree(string dir, string[] searchPatterns, string[] excludePatterns)
+static FileTree? GetFileTree(string sourceDir, string[] searchPatterns, string[] excludePatterns)
 {
-    return GetFileTreeInternal(Path.GetFullPath(dir), Path.GetFullPath(dir), searchPatterns.Select(GetRegex), excludePatterns.Select(GetRegex));
+    return GetFileTreeInternal(Path.GetFullPath(sourceDir), Path.GetFullPath(sourceDir), searchPatterns.Select(GetRegex), excludePatterns.Select(GetRegex));
 }
 
 static FileTree? GetFileTreeInternal(string rootDir, string dir, IEnumerable<Regex> searchRegexes, IEnumerable<Regex> excludeRegexes)
