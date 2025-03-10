@@ -2,7 +2,7 @@
 
 using System.Text.RegularExpressions;
 
-public readonly record struct FileTree(string Name, FileTree[] SubDirs, string[] Files)
+public readonly record struct FileTree(string Name, FileTree[] SubTrees, string[] Files)
 {
     public List<string> ToList()
     {
@@ -13,7 +13,7 @@ public readonly record struct FileTree(string Name, FileTree[] SubDirs, string[]
 
     private void ToList(ref List<string> fileList, string basePath = "")
     {
-        foreach (var item in SubDirs)
+        foreach (var item in SubTrees)
         {
             item.ToList(ref fileList, Path.Combine(basePath, item.Name));
         }
