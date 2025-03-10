@@ -1,3 +1,5 @@
+#load "FileTree.cs"
+
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -36,4 +38,31 @@ static string[] GetFileList(string sourceDir, string[] searchPatterns, string[] 
     }
 
     return files.ToArray();
+}
+
+static FileTree? GetFileTree(string sourceDir, string[] searchPatterns, string[] excludePatterns)
+{
+    return GetFileTreeInternal(Path.GetFullPath(sourceDir), Path.GetFullPath(sourceDir), searchPatterns.Select(GetRegex), excludePatterns.Select(GetRegex));
+}
+
+static FileTree? GetFileTreeInternal(string rootDir, string dir, IEnumerable<Regex> searchRegexes, IEnumerable<Regex> excludeRegexes)
+{
+    var subTrees = Directory.EnumerateDirectories(dir)
+                            .Select(v => GetFileTreeInternal(rootDir, v, searchRegexes, excludeRegexes))
+                            .Where(v => v.HasValue)
+                            .Select(v => v!.Value);
+
+    var files = Directory.EnumerateFiles(dir).Select(v => Path.GetRelativePath(rootDir, v));
+
+    if (searchRegexes.Any())
+    {
+        files = files.Where(file => searchRegexes.Any(regex => regex.IsMatch(file)));
+    }
+
+    if (excludeRegexes.Any())
+    {
+        files = files.Where(file => !excludeRegexes.Any(regex => regex.IsMatch(file)));
+    }
+
+    return !files.Any() && !subTrees.Any() ? null : new FileTree(Path.GetFileName(dir), subTrees.ToArray(), files.Select(Path.GetFileName).ToArray());
 }
