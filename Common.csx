@@ -24,7 +24,7 @@ static Regex GetRegex(string pattern)
 
 static string[] GetFileList(string sourceDir, string[] searchPatterns, string[] excludePatterns, SearchOption searchOption)
 {
-    IEnumerable<string> files = Directory.EnumerateFiles(sourceDir, "", searchOption).Select(v => Path.GetRelativePath(sourceDir, v));
+    IEnumerable<string> files = Directory.EnumerateFiles(sourceDir, "", searchOption).Select(v => Path.GetRelativePath(".", v));
 
     if (searchPatterns.Length > 0)
     {
