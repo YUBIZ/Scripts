@@ -1,5 +1,7 @@
 #load "FileTree.cs"
 
+#nullable enable
+
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -17,52 +19,68 @@ static void GenerateJson<T>(string outputFile, T value)
     File.WriteAllText(outputFile, JsonSerializer.Serialize(value, jsonSerializerOptions));
 }
 
-static Regex GetRegex(string pattern)
+static Regex? GetRegex(string[] patterns)
 {
-    return new Regex("^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$", RegexOptions.IgnoreCase);
+    if (patterns.Length == 0) return null;
+
+    string combinedPattern = string.Join("|", patterns.Select(p => $"({Regex.Escape(p).Replace(@"\*", ".*").Replace(@"\?", ".")})"));
+
+    return new Regex($"^({combinedPattern})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 }
 
-static IEnumerable<string> EnumerateFiles(string sourceDir, string[] searchPatterns, string[] excludePatterns, SearchOption searchOption)
+static IEnumerable<string> EnumerateFiles(string sourceDirPath, string[] searchPatterns, string[] excludePatterns, SearchOption searchOption)
 {
-    IEnumerable<string> files = Directory.EnumerateFiles(sourceDir, "", searchOption).Select(v => Path.GetRelativePath(".", v));
+    sourceDirPath = Path.TrimEndingDirectorySeparator(sourceDirPath);
 
-    if (searchPatterns.Length > 0)
+    string sourceDirName = Path.GetFileName(sourceDirPath);
+    var files = Directory.EnumerateFiles(sourceDirPath, "", searchOption).Select(v => Path.Combine(sourceDirName, Path.GetRelativePath(sourceDirPath, v)));
+
+    if (GetRegex(searchPatterns) is Regex searchRegex)
     {
-        IEnumerable<Regex> searchRegexes = searchPatterns.Select(GetRegex);
-        files = files.Where(v => searchRegexes.Any(regex => regex.IsMatch(v)));
+        files = files.Where(v => searchRegex.IsMatch(v));
     }
-    if (excludePatterns.Length > 0)
+    if (GetRegex(excludePatterns) is Regex excludeRegex)
     {
-        IEnumerable<Regex> excludeRegexes = excludePatterns.Select(GetRegex);
-        files = files.Where(v => !excludeRegexes.Any(regex => regex.IsMatch(v)));
+        files = files.Where(v => !excludeRegex.IsMatch(v));
     }
 
     return files;
 }
 
-static FileTree? GetFileTree(string sourceDir, string[] searchPatterns, string[] excludePatterns)
+static FileTree? GetFileTree(string sourceDirPath, string[] searchPatterns, string[] excludePatterns)
 {
-    return GetFileTreeInternal(Path.GetFullPath(sourceDir), Path.GetFullPath(sourceDir), searchPatterns.Select(GetRegex), excludePatterns.Select(GetRegex));
+    sourceDirPath = Path.TrimEndingDirectorySeparator(sourceDirPath);
+    string sourceDirFullPath = Path.GetFullPath(sourceDirPath);
+    string rootDirName = Path.GetFileName(sourceDirPath);
+
+    return GetFileTreeInternal(sourceDirFullPath, sourceDirFullPath, rootDirName, GetRegex(searchPatterns), GetRegex(excludePatterns));
 }
 
-static FileTree? GetFileTreeInternal(string rootDir, string dir, IEnumerable<Regex> searchRegexes, IEnumerable<Regex> excludeRegexes)
+static FileTree? GetFileTreeInternal(string rootDirPath, string dirPath, string rootDirName, Regex? searchRegex, Regex? excludeRegex)
 {
-    var subTrees = Directory.EnumerateDirectories(dir)
-                            .Select(v => GetFileTreeInternal(rootDir, v, searchRegexes, excludeRegexes))
-                            .Where(v => v.HasValue)
-                            .Select(v => v!.Value);
+    var subTrees = Directory.EnumerateDirectories(dirPath).
+                             AsParallel().
+                             Select(v => GetFileTreeInternal(rootDirPath, v, rootDirName, searchRegex, excludeRegex)).
+                             Where(v => v.HasValue).
+                             Select(v => v!.Value).
+                             ToArray();
 
-    var files = Directory.EnumerateFiles(dir).Select(v => Path.GetRelativePath(rootDir, v));
+    var EnumerableFiles = Directory.EnumerateFiles(dirPath).
+                          Select(v => Path.Combine(rootDirName, Path.GetRelativePath(rootDirPath, v)));
 
-    if (searchRegexes.Any())
+    if (searchRegex != null)
     {
-        files = files.Where(file => searchRegexes.Any(regex => regex.IsMatch(file)));
+        EnumerableFiles = EnumerableFiles.Where(v => searchRegex.IsMatch(v));
     }
 
-    if (excludeRegexes.Any())
+    if (excludeRegex != null)
     {
-        files = files.Where(file => !excludeRegexes.Any(regex => regex.IsMatch(file)));
+        EnumerableFiles = EnumerableFiles.Where(v => !excludeRegex.IsMatch(v));
     }
 
-    return !files.Any() && !subTrees.Any() ? null : new FileTree(Path.GetFileName(dir), subTrees.ToArray(), files.Select(Path.GetFileName).ToArray());
+    var files = EnumerableFiles.Select(Path.GetFileName).ToArray();
+
+    if (files.Length == 0 && subTrees.Length == 0) return null;
+
+    return new FileTree(Path.GetFileName(dirPath), subTrees, files);
 }
