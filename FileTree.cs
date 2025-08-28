@@ -1,21 +1,17 @@
 public readonly record struct FileTree(string Name, FileTree[] SubTrees, string[] Files)
 {
-    public List<string> ToList()
+    public IEnumerable<string> EnumerateFiles()
     {
-        List<string> fileList = [];
-        ToList(ref fileList);
-        return fileList;
+        return EnumerateFilesInternal("");
     }
 
-    private void ToList(ref List<string> fileList, string basePath = "")
+    private IEnumerable<string> EnumerateFilesInternal(string basePath)
     {
-        foreach (var item in SubTrees)
+        foreach (var subTree in SubTrees)
         {
-            item.ToList(ref fileList, Path.Combine(basePath, item.Name));
+            foreach (var file in subTree.EnumerateFilesInternal( Path.Combine(basePath, subTree.Name))) yield return file;
         }
-        foreach (var item in Files)
-        {
-            fileList.Add(Path.Combine(basePath, item));
-        }
+
+        foreach (var file in Files) yield return Path.Combine(basePath, file);
     }
 }
