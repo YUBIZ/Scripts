@@ -22,7 +22,7 @@ static Regex GetRegex(string pattern)
     return new Regex("^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$", RegexOptions.IgnoreCase);
 }
 
-static string[] GetFileList(string sourceDir, string[] searchPatterns, string[] excludePatterns, SearchOption searchOption)
+static IEnumerable<string> EnumerateFiles(string sourceDir, string[] searchPatterns, string[] excludePatterns, SearchOption searchOption)
 {
     IEnumerable<string> files = Directory.EnumerateFiles(sourceDir, "", searchOption).Select(v => Path.GetRelativePath(".", v));
 
@@ -37,7 +37,7 @@ static string[] GetFileList(string sourceDir, string[] searchPatterns, string[] 
         files = files.Where(v => !excludeRegexes.Any(regex => regex.IsMatch(v)));
     }
 
-    return files.ToArray();
+    return files;
 }
 
 static FileTree? GetFileTree(string sourceDir, string[] searchPatterns, string[] excludePatterns)
