@@ -1,7 +1,7 @@
 ﻿#r "nuget: LibGit2Sharp, 0.31.0"
 
 #load "Common.csx"
-#load "Models/FilePathWithCommitHistory.csx"
+#load "Models/FilePathAndCommitHistory.csx"
 #load "Models/PathInfo.csx"
 
 #nullable enable
@@ -48,7 +48,7 @@ static IEnumerable<CommitMetadata> EnumerateCommitHistory(Repository repo, strin
     });
 }
 
-static void GenerateFilePathWithCommitHistoryCollection(string sourceDirPath, string outputFilePath, string[] searchPatterns, string[] excludePatterns)
+static void GenerateFilePathAndCommitHistoryCollection(string sourceDirPath, string outputFilePath, string[] searchPatterns, string[] excludePatterns)
 {
     var repoPath = Repository.Discover(sourceDirPath);
     if (repoPath == null) return;
@@ -58,7 +58,7 @@ static void GenerateFilePathWithCommitHistoryCollection(string sourceDirPath, st
 
     var filePathInfos = EnumerateFilePathInfos(sourceDirPath, searchPatterns, excludePatterns);
 
-    var filePathWithCommitHistoryCollection = filePathInfos.Select(v => new FilePathWithCommitHistory(v.RelativePath, EnumerateCommitHistory(repo, Path.GetRelativePath(repoRootDir, v.AbsolutePath).Replace("\\", "/")).ToArray()));
+    var filePathAndCommitHistoryCollection = filePathInfos.Select(v => new FilePathAndCommitHistory(v.RelativePath, EnumerateCommitHistory(repo, Path.GetRelativePath(repoRootDir, v.AbsolutePath).Replace("\\", "/")).ToArray()));
 
-    GenerateJson(outputFilePath, filePathWithCommitHistoryCollection);
+    GenerateJson(outputFilePath, filePathAndCommitHistoryCollection);
 }
