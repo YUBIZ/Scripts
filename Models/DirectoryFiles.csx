@@ -1,1 +1,1 @@
-public readonly record struct DirectoryFiles(string Directory, string[] Files);
+public readonly record struct DirectoryNameAndFileNames(string DirectoryName, string[] FileNames);

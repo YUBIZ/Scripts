@@ -1,4 +1,4 @@
 #load "Tree.csx"
 #load "DirectoryFiles.csx"
 
-global using FileTree = Tree<DirectoryFiles>;
+global using FileTree = Tree<DirectoryNameAndFileNames>;
