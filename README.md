@@ -22,12 +22,12 @@ dotnet script Main.csx [sub-command]
 
 ## 명령어 목록
 
-| 명령어             | 설명                                                                  |
-| ------------------ | --------------------------------------------------------------------- |
-| generate-file-list | source-dir의 전체 파일 목록을 output-path에 json 형식으로 출력합니다. |
-| generate-file-tree | source-dir의 전체 파일 트리를 output-path에 json 형식으로 출력합니다. |
+| 명령어                                           | 설명                                                                                          |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| generate-file-path-and-commit-history-collection | source-dir-path의 파일 경로와 커밋 이력 컬렉션을 output-file-path에 json 형식으로 출력합니다. |
+| generate-file-tree                               | source-dir-path의 전체 파일 트리를 output-file-path에 json 형식으로 출력합니다.               |
 
 # 참고
 
--   [dotnet script GitHub 저장소](https://github.com/dotnet-script/dotnet-script)
--   [System.CommandLine 문서](https://learn.microsoft.com/ko-kr/dotnet/standard/commandline)
+- [dotnet script GitHub 저장소](https://github.com/dotnet-script/dotnet-script)
+- [System.CommandLine 문서](https://learn.microsoft.com/ko-kr/dotnet/standard/commandline)
