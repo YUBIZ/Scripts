@@ -26,6 +26,7 @@ dotnet script Main.csx [sub-command]
 | ------------------------------------------------ | --------------------------------------------------------------------------------------------- |
 | generate-file-path-and-commit-history-collection | source-dir-path의 파일 경로와 커밋 이력 컬렉션을 output-file-path에 json 형식으로 출력합니다. |
 | generate-file-tree                               | source-dir-path의 전체 파일 트리를 output-file-path에 json 형식으로 출력합니다.               |
+| generate-site-map                                | source-dir-path의 전체 사이트 맵을 output-file-path에 xml 형식으로 출력합니다.                |
 
 # 참고
 
