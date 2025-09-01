@@ -1,14 +1,20 @@
 #r "nuget: LibGit2Sharp, 0.31.0"
+#r "nuget: Newtonsoft.Json, 13.0.3"
 
 #load "Models/Aliases.csx"
 
 #nullable enable
 
 using LibGit2Sharp;
+using Newtonsoft.Json;
+using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Text.Unicode;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Serialization;
 
 static void GenerateJson<T>(string outputFilePath, T value)
 {
@@ -19,7 +25,48 @@ static void GenerateJson<T>(string outputFilePath, T value)
 
     JsonSerializerOptions jsonSerializerOptions = new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
 
-    File.WriteAllText(outputFilePath, JsonSerializer.Serialize(value, jsonSerializerOptions));
+    File.WriteAllText(outputFilePath, System.Text.Json.JsonSerializer.Serialize(value, jsonSerializerOptions));
+}
+
+static void GenerateXml<T>(string outputFilePath, T value, string rootName, string namespaceUri = "", bool RemoveEmptyElements = true)
+{
+    if (Path.GetDirectoryName(outputFilePath) is string outputDirPath && !string.IsNullOrEmpty(outputDirPath) && !Directory.Exists(outputDirPath))
+    {
+        Directory.CreateDirectory(outputDirPath);
+    }
+
+    JsonSerializerOptions jsonSerializerOptions = new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+    var jsonString = System.Text.Json.JsonSerializer.Serialize(value, jsonSerializerOptions);
+
+    XmlDocument? xmlDoc = JsonConvert.DeserializeXmlNode(jsonString, rootName);
+    if (xmlDoc == null || xmlDoc.DocumentElement == null) return;
+
+    XElement rootElement = XElement.Parse(xmlDoc.DocumentElement.OuterXml);
+
+    if (!string.IsNullOrEmpty(namespaceUri))
+    {
+        XNamespace ns = namespaceUri;
+        foreach (var node in rootElement.DescendantsAndSelf())
+        {
+            node.Name = ns + node.Name.LocalName;
+        }
+    }
+
+    if (RemoveEmptyElements)
+    {
+        var emptyElements = rootElement.Descendants()
+                .Where(v => !v.HasElements && string.IsNullOrEmpty(v.Value))
+                .ToList();
+
+        foreach (var element in emptyElements)
+        {
+            element.Remove();
+        }
+    }
+
+    var finalXml = new XDocument(new XDeclaration("1.0", "utf-8", null), rootElement);
+
+    finalXml.Save(outputFilePath);
 }
 
 static Regex? GetRegex(string[] patterns)
@@ -73,7 +120,7 @@ static IEnumerable<CommitMetadata> EnumerateCommitHistory(Repository repo, strin
 static FileTree GetFileTree(string sourceDirPath, string[] searchPatterns, string[] excludePatterns)
 {
     sourceDirPath = Path.TrimEndingDirectorySeparator(sourceDirPath);
-    
+
     string sourceDirFullPath = Path.GetFullPath(sourceDirPath);
     string rootDirName = Path.GetFileName(sourceDirPath);
 
