@@ -16,7 +16,7 @@ public static void GenerateSiteMap(string sourceDirPath, string outputFilePath, 
 
     var filePathAndCommitHistoryCollection = filePathInfos.Select(v => new FilePathAndCommitHistory(v.RelativePath, EnumerateCommitHistory(repo, Path.GetRelativePath(repoRootDir, v.AbsolutePath).Replace("\\", "/")).ToArray()));
 
-    var urlSet = filePathAndCommitHistoryCollection.Select(v => new Url(Path.Combine(baseUrl, v.FilePath), v.CommitHistory.Max(v1 => v1.Date).ToString("yyyy-MM-dd"), null, null)).ToArray();
+    var urlSet = filePathAndCommitHistoryCollection.Select(v => new Url(baseUrl + v.FilePath, v.CommitHistory.Max(v1 => v1.Date).ToString("yyyy-MM-dd"), null, null)).ToArray();
 
     GenerateXml(outputFilePath, urlSet, "urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");
 }
