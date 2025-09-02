@@ -1,20 +1,18 @@
 #r "nuget: LibGit2Sharp, 0.31.0"
-#r "nuget: Newtonsoft.Json, 13.0.3"
 
 #load "Models/Aliases.csx"
 
 #nullable enable
 
 using LibGit2Sharp;
-using Newtonsoft.Json;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Text.Unicode;
 using System.Xml;
 using System.Xml.Linq;
-using System.Xml.Serialization;
 
 static void GenerateJson<T>(string outputFilePath, T value)
 {
@@ -23,50 +21,30 @@ static void GenerateJson<T>(string outputFilePath, T value)
         Directory.CreateDirectory(outputDirPath);
     }
 
-    JsonSerializerOptions jsonSerializerOptions = new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+    var jsonSerializerOptions = new JsonSerializerOptions { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
 
     File.WriteAllText(outputFilePath, System.Text.Json.JsonSerializer.Serialize(value, jsonSerializerOptions));
 }
 
-static void GenerateXml<T>(string outputFilePath, T value, string rootName, string namespaceUri = "", bool RemoveEmptyElements = true)
+static void GenerateXml<T>(string outputFilePath, T value, string rootName, string rootNamespace)
 {
     if (Path.GetDirectoryName(outputFilePath) is string outputDirPath && !string.IsNullOrEmpty(outputDirPath) && !Directory.Exists(outputDirPath))
     {
         Directory.CreateDirectory(outputDirPath);
     }
 
-    JsonSerializerOptions jsonSerializerOptions = new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
-    var jsonString = System.Text.Json.JsonSerializer.Serialize(value, jsonSerializerOptions);
-
-    XmlDocument? xmlDoc = JsonConvert.DeserializeXmlNode(jsonString, rootName);
-    if (xmlDoc == null || xmlDoc.DocumentElement == null) return;
-
-    XElement rootElement = XElement.Parse(xmlDoc.DocumentElement.OuterXml);
-
-    if (!string.IsNullOrEmpty(namespaceUri))
+    var serializer = new DataContractSerializer(typeof(T), rootName, rootNamespace);
+    using var memoryStream = new MemoryStream();
+    using (var writer = XmlWriter.Create(memoryStream, new XmlWriterSettings { Indent = true, Encoding = System.Text.Encoding.UTF8 }))
     {
-        XNamespace ns = namespaceUri;
-        foreach (var node in rootElement.DescendantsAndSelf())
-        {
-            node.Name = ns + node.Name.LocalName;
-        }
+        serializer.WriteObject(writer, value);
     }
+    memoryStream.Position = 0;
+    XDocument xDoc = XDocument.Load(memoryStream);
 
-    if (RemoveEmptyElements)
-    {
-        var emptyElements = rootElement.Descendants()
-                .Where(v => !v.HasElements && string.IsNullOrEmpty(v.Value))
-                .ToList();
+    if (xDoc.Root == null) return;
 
-        foreach (var element in emptyElements)
-        {
-            element.Remove();
-        }
-    }
-
-    var finalXml = new XDocument(new XDeclaration("1.0", "utf-8", null), rootElement);
-
-    finalXml.Save(outputFilePath);
+    xDoc.Save(outputFilePath);
 }
 
 static Regex? GetRegex(string[] patterns)

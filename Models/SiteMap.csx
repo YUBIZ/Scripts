@@ -1,5 +1,4 @@
-using System.Text.Json.Serialization;
+using System.Runtime.Serialization;
 
-public readonly record struct Url([property: JsonPropertyName("loc")] string Location, [property: JsonPropertyName("lastmod")] string LastModified, [property: JsonPropertyName("changefreq")] string ChangeFrequency, [property: JsonPropertyName("priority")] string Priority);
-
-public readonly record struct UrlSet([property: JsonPropertyName("url")] Url[] Urls);
+[DataContract(Name = "url", Namespace = "http://www.sitemaps.org/schemas/sitemap/0.9")]
+public readonly record struct Url([property: DataMember(Name = "loc", Order = 0)] string Location, [property: DataMember(Name = "lastmod", Order = 1)] string LastModified, [property: DataMember(Name = "changefreq", EmitDefaultValue = false, Order = 2)] string ChangeFrequency, [property: DataMember(Name = "priority", EmitDefaultValue = false, Order = 3)] string Priority);
