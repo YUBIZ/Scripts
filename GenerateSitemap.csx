@@ -1,6 +1,6 @@
 #load "Common.csx"
 #load "Models/FilePathAndCommitHistory.csx"
-#load "Models/SiteMap.csx"
+#load "Models/Sitemap.csx"
 
 using LibGit2Sharp;
 
