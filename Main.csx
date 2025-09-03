@@ -2,7 +2,7 @@
 
 #load "GenerateFilePathAndCommitHistoryCollection.csx"
 #load "GenerateFileTree.csx"
-#load "GenerateSiteMap.csx"
+#load "GenerateSitemap.csx"
 
 using System.CommandLine;
 
@@ -50,7 +50,7 @@ RootCommand rootCommand = new("스크립트 명령어를 실행합니다.");
     rootCommand.Add(GenerateFileTreeCommand);
 }
 
-// GenerateSiteMap Command
+// GenerateSitemap Command
 {
     Argument<string> argument = new("source-dir-path", "탐색할 디렉터리 경로입니다.");
     Argument<string> argument1 = new("output-file-path", "결과를 저장할 XML 파일 경로입니다.");
@@ -59,7 +59,7 @@ RootCommand rootCommand = new("스크립트 명령어를 실행합니다.");
     Option<string[]> option = new("--search-patterns", "일치해야하는 파일 패턴 목록입니다.");
     Option<string[]> option1 = new("--exclude-patterns", "제외해야하는 파일 패턴 목록입니다.");
 
-    var GenerateSiteMapCommand = new Command("generate-site-map", "사이트 맵을 생성합니다.")
+    var GenerateSitemapCommand = new Command("generate-sitemap", "사이트 맵을 생성합니다.")
     {
         argument,
         argument1,
@@ -68,9 +68,9 @@ RootCommand rootCommand = new("스크립트 명령어를 실행합니다.");
         option1
     };
 
-    GenerateSiteMapCommand.SetHandler(GenerateSiteMap, argument, argument1, argument2, option, option1);
+    GenerateSitemapCommand.SetHandler(GenerateSitemap, argument, argument1, argument2, option, option1);
 
-    rootCommand.Add(GenerateSiteMapCommand);
+    rootCommand.Add(GenerateSitemapCommand);
 }
 
 return await rootCommand.InvokeAsync([.. Args]);
