@@ -4,7 +4,7 @@
 
 using LibGit2Sharp;
 
-public static void GenerateSiteMap(string sourceDirPath, string outputFilePath, string baseUrl, string[] searchPatterns, string[] excludePatterns)
+public static void GenerateSitemap(string sourceDirPath, string outputFilePath, string baseUrl, string[] searchPatterns, string[] excludePatterns)
 {
     var repoPath = Repository.Discover(sourceDirPath);
     if (repoPath == null) return;
